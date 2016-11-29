@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Andrew's Test</title>
+<style>
+
+@import url(style.css);
+ 
+#circle circle {
+fill: none;
+pointer-events: all;
+}
+ 
+.group path {
+fill-opacity: .5;
+}
+ 
+path.chord {
+stroke: #000;
+stroke-width: .25px;
+}
+ 
+#circle:hover path.fade {
+display: none;
+}
+ 
+</style>
+ 
+<header>
+</header>
+
+<body>
+
+<!-- <script src="http://d3js.org/d3.v2.min.js?2.8.1"></script> -->
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<!-- <script type="text/javascript" src="data_small.js" ></script> -->
+<script type="text/javascript" src="data.js" ></script>
+<script>
+
+//Processing data
+var matrix = [];
+var matrix_part = [];
+var points = _data.points;
+var marker_names = _data.names;
+var cluster_names = [];
+
+for (var i = 0; i < points.length; i++)
+{
+	if(!cluster_names.includes("cluster" + points[i].clusterID))
+		cluster_names.push("cluster" + points[i].clusterID);
+}
+
+var group_names = cluster_names.concat(marker_names);
+var group_num = [];
+
+for (var i = 0; i < group_names.length; i++)
+{
+	matrix[i] = [];
+	matrix_part[i] = [];
+	group_num[i] = 0;
+	for (var j = 0; j < group_names.length; j++)
+	{
+		matrix_part[i][j] = 0;
+		matrix[i][j] = 0;
+	}
+}
+
+//Sort the importance of markers
+var show_marker_num = 2,
+	cluster_marker_matrix = [];
+
+for (var i = 0; i < cluster_names.length; i++)
+{
+	cluster_marker_matrix[i] = [];
+	for (var j = 0; j < marker_names.length; j++)
+	{
+		cluster_marker_matrix[i][j] = [];
+	}
+}
+
+for (var i = 0; i < points.length; i++)
+{
+	for(var j = 0; j < points[i].expression.length; j++)
+	{
+		var cluster_index = cluster_names.indexOf("cluster"+points[i].clusterID);
+		cluster_marker_matrix[cluster_index][j].push(points[i].expression[j]);
+	}
+}
+
+var variance_matrix = [],
+	mean_matrix = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+	variance_matrix[i] = [];
+	mean_matrix[i] = [];
+	for (var j = 0; j < marker_names.length; j++)
+	{
+		variance_matrix[i][j] = [];
+		mean_matrix[i][j] = [];
+
+		variance_matrix[i][j].push(d3.deviation(cluster_marker_matrix[i][j]), j)
+		mean_matrix[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
+	}
+}
+
+var ranking_score = [];
+var ranking_score_pair = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+	variance_matrix[i].sort(function(x, y){
+	   return d3.descending(x[0], y[0]);
+	});
+
+	mean_matrix[i].sort(function(x, y){
+	   return d3.ascending(x[0], y[0]);
+	});
+
+	ranking_score[i] = [];
+	ranking_score_pair[i] = [];
+	for(var j = 0; j < marker_names.length; j++)
+	{
+		ranking_score[i][variance_matrix[i][j][1]] = j;
+		ranking_score[i][mean_matrix[i][j][1]] += j;
+	}
+
+	for(var j = 0; j < marker_names.length; j++)
+	{
+		ranking_score_pair[i][j] = [];
+		ranking_score_pair[i][j].push(ranking_score[i][j], j);
+	}
+
+	ranking_score_pair[i].sort(function(x, y){
+	   return d3.descending(x[0], y[0]);
+	});
+}
+
+//Construct Matrix
+var cluster_length = cluster_names.length;
+for (var i = 0; i < points.length; i++)
+{
+	for(var j = 0; j < points[i].expression.length; j++)
+	{
+		var cluster_index = group_names.indexOf("cluster"+points[i].clusterID);
+		var marker_index = group_names.indexOf(marker_names[j]);
+		matrix[cluster_index][marker_index] += points[i].expression[j];
+		group_num[cluster_index] += 1;
+	}
+}
+
+for (var i = 0; i < group_names.length; i++)
+{
+	if(group_num[i]>0)
+	{
+		for (var j = 0; j < group_names.length; j++)
+			matrix[i][j] /= group_num[i]; 
+	}
+}
+
+//Update matrix_part
+for (var i = 0; i < cluster_names.length; i++)
+{
+	for (var j = 0; j < show_marker_num; j++)
+	{
+		var marker_index = group_names.indexOf(marker_names[ranking_score_pair[i][j][1]]);
+		matrix_part[i][marker_index] = matrix[i][marker_index];
+		matrix_part[marker_index][marker_index] = 0.02;
+	}		
+}
+
+//Color functions
+// var c20b = d3.scale.category20();
+
+function colores_google(n) {
+  var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+  return colores_g[n % colores_g.length];
+}
+
+//Draw SVG
+var width = 600,
+height = 600,
+outerRadius = Math.min(width, height) / 2 - 10,
+innerRadius = outerRadius - 24;
+ 
+var formatPercent = d3.format(".1%");
+ 
+var arc = d3.svg.arc()
+			.innerRadius(innerRadius)
+			.outerRadius(outerRadius);
+ 
+var layout = d3.layout.chord()
+				.padding(.04);
+				// .sortSubgroups(d3.descending)
+				// .sortChords(d3.ascending);
+ 
+var path = d3.svg.chord()
+				.radius(innerRadius);
+ 
+var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height);
+
+draw_chord();
+
+//Update show_marker_num and remove all drawings on SVG
+function select_show_num()
+{
+	var e = document.getElementById("show_num");
+  	show_marker_num = e.selectedIndex + 1;
+
+  	d3.selectAll("#circle").remove();
+  	draw_chord();
+}
+
+//Draw chord
+function draw_chord()
+{
+	for (var i = 0; i < group_names.length; i++)
+	{
+		matrix_part[i] = [];
+		for (var j = 0; j < group_names.length; j++)
+			matrix_part[i][j] = 0;
+	}
+
+	for (var i = 0; i < cluster_names.length; i++)
+	{
+		for (var j = 0; j < show_marker_num; j++)
+		{
+			var marker_index = group_names.indexOf(marker_names[ranking_score_pair[i][j][1]]);
+			matrix_part[i][marker_index] = matrix[i][marker_index];
+			matrix_part[marker_index][marker_index] = 0.02;
+		}		
+	}
+
+	var circle = svg.append("g")
+		.attr("id", "circle")
+		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+	circle.append("circle")
+		.attr("r", outerRadius);
+
+	layout.matrix(matrix_part);
+					 
+	// Add a group per neighborhood.
+	var group = circle.selectAll(".group")
+			.data(layout.groups)	//each row
+			.enter().append("g")
+			.attr("class", "group")
+			.on("mouseover", mouseover);
+	 
+	// Add a mouseover title.
+	// group.append("title").text(function(d, i) {
+	// return cities[i].name + ": " + formatPercent(d.value) + " of origins";
+	// });
+	 
+	// Add the group arc.
+	var groupPath = group.append("path")
+						.attr("id", function(d, i) { return "group" + i; })
+						.attr("d", arc)
+						.style("fill", function(d, i) { return colores_google(i); });
+	 
+	// Add a text label.
+	var groupText = group.append("text")
+						.attr("x", 6)
+						.attr("dy", 15);
+	 
+	groupText.append("textPath")
+			.attr("xlink:href", function(d, i) { return "#group" + i; })
+			.text(function(d, i) { return group_names[i]; });
+	 
+	// Remove the labels that don't fit. :(
+	// groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 +1.5 < this.getComputedTextLength(); })
+	// .remove();
+
+	groupText.filter(function(d, i) { return d3.max(matrix_part[i])==0})
+	 		.remove();
+	 
+	// Add the chords.
+	var chord = circle.selectAll(".chord")
+		.data(layout.chords)
+		.enter().append("path")
+		.attr("class", "chord")
+		.style("fill", function(d) { return colores_google(d.target.index); })
+		.attr("d", path);
+	 
+	// Add an elaborate mouseover title for each chord.
+	 chord.append("title").text(function(d) {
+		 return group_names[d.source.index]
+		 + " → " + group_names[d.target.index]
+		 + ": " + formatPercent(d.source.value)
+		 + "\n" + group_names[d.target.index]
+		 + " → " + group_names[d.source.index]
+		 + ": " + formatPercent(d.target.value);
+	 });
+
+	 function mouseover(d, i) {
+		chord.classed("fade", function(p) {
+		return p.source.index != i
+		&& p.target.index != i;
+	});
+} 
+}
+
+
+
+</script>
+
+<p>Please select the number of most important markers shown per cluster</p>
+<div id = "container" align="left" style = "left: 300px; position: relative;">
+<div id = "selectionUI">
+  <select id="show_num" onchange="select_show_num()">
+
+  	<script>
+  		var show_num = d3.select("#show_num");
+
+  		for(var i = 0; i < marker_names.length; i++)
+  		{
+  			show_num.append("option")
+  					.attr("value", i+1)
+					.text(i + 1);
+  		}
+  		document.getElementById("show_num").value = show_marker_num;
+  						
+  	</script>
+  </select>
+</div>
+</div>
+</body>
