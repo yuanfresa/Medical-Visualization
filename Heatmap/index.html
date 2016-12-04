@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <style>
+
+      rect.bordered {
+        stroke: #bbb;
+        stroke-width:2px;   
+      }
+
+      text.mono {
+        font-size: 9pt;
+        font-family: verdana;
+        fill: #aaa;
+      }
+
+      text.mono:hover {
+        font-size: 12pt;
+        font-family: verdana;
+        fill: #aaa;
+        font-weight: bold;
+      }
+
+      .square {
+        opacity: 0.5;
+      }
+      
+      .square:hover {
+        opacity: 1.0;
+      }
+
+      .d3-tip {
+        font-family: Verdana;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 8px;
+        color: #fff; 
+        z-index: 5070;
+      }
+    
+    </style>
+
+
+    <button type="button" id="mean">Mean</button>
+    <button type="button" id="variance">Variance</button>
+       
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen"> -->
+    <!-- <script src="js/bootstrap.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen"> -->
+
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+    <script src="data.js"> 
+    // <script src="rand.js">
+    </script>
+
+
+  </head>
+  <body>
+
+    <script type="text/javascript">
+
+var points = _data.points;
+var marker_names = _data.names;
+var cluster_names = [];
+
+for (var i = 0; i < points.length; i++)
+{
+  if(!cluster_names.includes(points[i].clusterID))
+    cluster_names.push(points[i].clusterID); // too long
+}
+
+//data processing
+var show_marker_num = 2,
+  cluster_marker_matrix = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+  cluster_marker_matrix[i] = [];
+  for (var j = 0; j < marker_names.length; j++)
+  {
+    cluster_marker_matrix[i][j] = [];
+  }
+}
+for (var i = 0; i < points.length; i++)
+{
+  for(var j = 0; j < points[i].expression.length; j++)
+  {
+    var cluster_index = cluster_names.indexOf(points[i].clusterID); 
+    cluster_marker_matrix[cluster_index][j].push(points[i].expression[j]);
+  }
+}
+var variance_matrix = [],
+  mean_matrix = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+  variance_matrix[i] = [];
+  mean_matrix[i] = [];
+
+  for (var j = 0; j < marker_names.length; j++)
+  {
+
+    variance_matrix[i][j] = [];
+    mean_matrix[i][j] = [];
+    variance_matrix[i][j].push(d3.deviation(cluster_marker_matrix[i][j]), j)
+    mean_matrix[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
+  }
+}
+
+var data = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+  for (var j = 0; j < marker_names.length; j++)
+  {
+    data.push({
+      dim1: (j + 1),
+      dim2: (i + 1),
+      value: mean_matrix[i][j][0],
+      //default value : mean
+
+    });
+  }
+}
+
+var margin = { top: 50, right: 80, bottom: 50, left: 100 },
+    col_num = cluster_names.length,
+    row_num = marker_names.length,
+    width = 960 - margin.left - margin.right,
+    height = 630 - margin.top - margin.bottom,
+    gridSize = Math.floor(height / row_num),
+  
+    // gridSize = 30,
+    // width = gridSize*col_num,
+    // height= gridSize*row_num,
+    legendWidth = gridSize * 1.5;
+    // dim_1--> marker_names  y axis
+    // dim_2--> cluster_names x axis
+    
+
+var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+draw_heatmap(data);
+
+// default mean
+function draw_heatmap(data)
+{
+  //color
+  var maxNum = Math.max.apply(Math,data.map(function(o){return o.value;}));
+  maxNum = Math.floor(maxNum)+1;
+  var buckets = maxNum;
+    //var minNum = Math.round(d3.min(d3.min(mean_matrix))[0]）;
+  var colors = colorbrewer.RdYlGn[buckets];
+  var colorScale = d3.scale.quantile()    // is a function
+      .domain([0, buckets-1, maxNum])
+      .range(colors);
+
+  // y axis
+  var markerLabels = svg.selectAll(".markerLabel")
+      .data(marker_names)
+      .enter().append("text")
+        .text(function (d) { return d; })
+        .attr("x", 0)
+        .attr("y", function (d, i) { return i * gridSize; })
+        .style("text-anchor", "end")
+        .attr("transform", "translate(-6," + gridSize / 1.5 + ")")
+        .attr("class", function (d,i) { return "marker_names mono r" + i;});
+  //x axis      
+  var clusterLabels = svg.selectAll(".clusterLabel")
+      .data(cluster_names)
+      .enter().append("text")
+        .text(function(d) { return d; })
+        .attr("x", function(d, i) { return i * gridSize; })
+        .attr("y", 0)
+        .style("text-anchor", "middle")
+        .attr("transform", "translate(" + gridSize / 2 + ", -6)") 
+        .attr("class","mono");
+    //tip  mouse hover
+    var tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .style("visibility","visible")
+                .offset([-24, 0])
+                .html(function(d) {
+                  return d.value;
+                });
+
+      tip(svg.append("g"));
+  
+  //heatmap
+  var heatMap = svg.selectAll(".heatMap")
+      .data(data)
+      .enter().append("rect")
+      .attr("x", function(d) { return (d.dim2 - 1) * gridSize; })
+      .attr("y", function(d) { return (d.dim1 - 1) * gridSize; })
+      .attr("rx", 4)
+      .attr("ry", 4)
+      .attr("class", "dim2 bordered")
+      .attr("width", gridSize)  //-2
+      .attr("height", gridSize) // -2
+      .style("fill", colors[0])
+      .attr("class", "square")
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);        
+
+    heatMap.transition()
+        .style("fill", function(d) { return colorScale(d.value); });
+
+    heatMap.append("title").text(function(d) { return d.value; });  
+
+    var legenddata=[];
+    for (var i = 0; i < maxNum; i++) {
+      legenddata[i] = i;
+    }
+    var legend = svg.selectAll(".legend")
+              .data(legenddata)//.data([0].concat(colorScale.quantiles()), function(d) { return d; })
+              .enter().append("g")
+              .attr("class", "legend");
+
+    legend.append("rect")
+      .attr("x", function(d, i) { return gridSize * (col_num+5); })
+      .attr("y", function(d, i) { return (i * legendWidth + 7); })
+      .attr("width", gridSize)
+      .attr("height", gridSize)
+      .style("fill", function(d, i) { return colors[i]; })
+      .attr("class", "square");
+
+    legend.append("text")
+      .attr("class", "mono")
+      .text(function(d) { return Math.round(d); })
+      .attr("x", function(d, i) { return gridSize * (col_num+5) + 25; })
+      .attr("y", function(d, i) { return (i * legendWidth + 20); })
+
+
+    var title = svg.append("text")
+          .attr("class", "mono")
+          .attr("x", gridSize * (col_num+5))
+          .attr("y", - 6)         
+          .style("font-size", "14px")
+          .text("Legend");
+};
+
+// when user updates, change value
+d3.select("#mean").on("click", function(d) { update(data, "mean"); } );
+d3.select("#variance").on("click", function(d) { update(data, "variance"); } );
+
+function update(data, dist)
+{
+  d3.selectAll("class","d3-tip").remove();
+
+  for (var i = 0; i < col_num; i++)
+  {
+    for (var j = 0; j < row_num; j++)
+    {
+        if (dist == "mean") {
+          data[i*col_num+j].value = mean_matrix[i][j][0];
+        }
+        else if(dist == "variance"){
+          data[i*col_num+j].value = variance_matrix[i][j][0];
+        }
+    }
+  }
+  draw_heatmap(data);
+};
+
+
+    </script>
+  </body>
+</html>
