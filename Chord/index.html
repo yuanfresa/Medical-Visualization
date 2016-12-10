@@ -11,7 +11,7 @@ pointer-events: all;
 }
  
 .group path {
-fill-opacity: .5;
+	fill-opacity: .5;
 }
  
 path.chord {
@@ -20,7 +20,11 @@ stroke-width: .25px;
 }
  
 #circle:hover path.fade {
-display: none;
+	display: none;
+}
+
+#circle path.unshow {
+	display: none;
 }
  
 </style>
@@ -66,7 +70,8 @@ for (var i = 0; i < group_names.length; i++)
 
 //Sort the importance of markers
 var show_marker_num = 2,
-	cluster_marker_matrix = [];
+	cluster_marker_matrix = [],
+	show_all_cluster = true;
 
 for (var i = 0; i < cluster_names.length; i++)
 {
@@ -201,13 +206,69 @@ var svg = d3.select("body").append("svg")
 draw_chord();
 
 //Update show_marker_num and remove all drawings on SVG
-function select_show_num()
+function ClearChord()
 {
 	var e = document.getElementById("show_num");
   	show_marker_num = e.selectedIndex + 1;
+  	show_all_cluster = true;
 
   	d3.selectAll("#circle").remove();
   	draw_chord();
+}
+
+function ShowChordImportance(num)
+{
+	show_all_cluster = true;
+	show_marker_num = num;
+
+	d3.selectAll("#circle").remove();
+  	draw_chord();
+}
+
+function ShowChordCluster(index)
+{
+
+	var chord = svg.selectAll("#circle").selectAll(".chord")
+
+	// if(show_all_cluster)
+	// {
+	// 	show_all_cluster = false;
+	// 	chord.classed("unshow", true);
+	// }
+
+	// chord.classed("unshow", function(p) {
+	// 	return (p.source.index != index
+	// 	&& p.target.index != index) && this.classList.contains("unshow");
+	// });
+	
+	i = index;
+
+	if(show_all_cluster)
+	{
+		show_all_cluster = false;
+		chord.classed("unshow", true);
+	}
+
+	chord.classed("unshow", function(p) {
+		if(p.source.index == i || p.target.index == i)
+			return !this.classList.contains("unshow");
+		else
+			return this.classList.contains("unshow");
+	});
+}
+
+function ShowChordMarker(index)
+{
+	var chord = svg.selectAll("#circle").selectAll(".chord")
+	var i =  cluster_names.indexOf(marker_names[index]);
+	
+	i = index;
+	chord.classed("unshow", function(p) {
+		if(p.source.index == i || p.target.index == i)
+			return !this.classList.contains("unshow");
+		else
+			return this.classList.contains("unshow");
+	});
 }
 
 //Draw chord
@@ -244,7 +305,8 @@ function draw_chord()
 			.data(layout.groups)	//each row
 			.enter().append("g")
 			.attr("class", "group")
-			.on("mouseover", mouseover);
+			.on("mouseover", mouseover)
+			.on("mousedown", mousedown);
 	 
 	// Add a mouseover title.
 	// group.append("title").text(function(d, i) {
@@ -280,6 +342,11 @@ function draw_chord()
 		.attr("class", "chord")
 		.style("fill", function(d) { return colores_google(d.target.index); })
 		.attr("d", path);
+
+	chord.filter(function(d, i) {
+			return d.source.index == d.target.index;
+		})
+		.remove();
 	 
 	// Add an elaborate mouseover title for each chord.
 	 chord.append("title").text(function(d) {
@@ -293,20 +360,34 @@ function draw_chord()
 
 	 function mouseover(d, i) {
 		chord.classed("fade", function(p) {
-		return p.source.index != i
-		&& p.target.index != i;
-	});
-} 
+			return p.source.index != i
+			&& p.target.index != i;
+		});
+	}
+
+	function mousedown(d, i){
+
+		if(show_all_cluster && i >= marker_names.length)
+		{
+			show_all_cluster = false;
+			chord.classed("unshow", true);
+		}
+
+		chord.classed("unshow", function(p) {
+			if(p.source.index == i || p.target.index == i)
+				return !this.classList.contains("unshow");
+			else
+				return this.classList.contains("unshow");
+		});
+	} 
 }
-
-
 
 </script>
 
 <p>Please select the number of most important markers shown per cluster</p>
 <div id = "container" align="left" style = "left: 300px; position: relative;">
 <div id = "selectionUI">
-  <select id="show_num" onchange="select_show_num()">
+  <select id="show_num" onchange="ClearChord()">
 
   	<script>
   		var show_num = d3.select("#show_num");
