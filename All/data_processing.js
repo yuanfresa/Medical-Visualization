@@ -49,12 +49,16 @@ for (var i = 0; i < points.length; i++)
 	}
 }
 
+//mean_variance[cluster_id][marker_id] = markers' mean's variance;
 var variance_matrix = [],
-	mean_matrix = [];
+	mean_matrix = [],
+	mean_variance = [];
 for (var i = 0; i < cluster_names.length; i++)
 {
 	variance_matrix[i] = [];
 	mean_matrix[i] = [];
+	mean_variance[i] = [];
+
 	for (var j = 0; j < marker_names.length; j++)
 	{
 		variance_matrix[i][j] = [];
@@ -62,6 +66,24 @@ for (var i = 0; i < cluster_names.length; i++)
 
 		variance_matrix[i][j].push(d3.deviation(cluster_marker_matrix[i][j]), j)
 		mean_matrix[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
+	}
+}
+
+//mean_by_marker[marker_id][cluster_id] = mean_value;
+var mean_by_marker = [];
+for (var j = 0; j < marker_names.length; j++)
+{
+	mean_by_marker[j] = [];
+	for(var i = 0; i < cluster_names.length; i++)
+	{
+		mean_by_marker[j][i] = mean_matrix[i][j][0];
+	}
+	var mean_buff = d3.mean(mean_by_marker[j]);
+
+	for(var i = 0; i < cluster_names.length; i++)
+	{
+		mean_variance[i][j] = [];
+		mean_variance[i][j].push(Math.abs(mean_by_marker[j][i]-mean_buff), j);
 	}
 }
 
@@ -73,7 +95,11 @@ for (var i = 0; i < cluster_names.length; i++)
 	   return d3.descending(x[0], y[0]);
 	});
 
-	mean_matrix[i].sort(function(x, y){
+	// mean_matrix[i].sort(function(x, y){
+	//    return d3.ascending(x[0], y[0]);
+	// });
+
+	mean_variance[i].sort(function(x, y){
 	   return d3.ascending(x[0], y[0]);
 	});
 
@@ -82,7 +108,7 @@ for (var i = 0; i < cluster_names.length; i++)
 	for(var j = 0; j < marker_names.length; j++)
 	{
 		ranking_score[i][variance_matrix[i][j][1]] = j;
-		ranking_score[i][mean_matrix[i][j][1]] += j;
+		ranking_score[i][mean_variance[i][j][1]] += j;
 	}
 
 	for(var j = 0; j < marker_names.length; j++)
@@ -92,6 +118,21 @@ for (var i = 0; i < cluster_names.length; i++)
 	}
 
 	ranking_score_pair[i].sort(function(x, y){
+	   return d3.descending(x[0], y[0]);
+	});
+}
+
+var ranking_score_pair_marker = [];
+for(var j = 0; j < marker_names.length; j++)
+{
+	ranking_score_pair_marker[j] = [];
+	for(var i = 0; i < cluster_names.length; i++)
+	{
+		ranking_score_pair_marker[j][i] = [];
+		ranking_score_pair_marker[j][i].push(ranking_score[i][j], i);
+	}
+
+	ranking_score_pair_marker[j].sort(function(x, y){
 	   return d3.descending(x[0], y[0]);
 	});
 }
@@ -127,6 +168,23 @@ for (var i = 0; i < cluster_names.length; i++)
 		matrix_part[i][marker_index] = matrix[i][marker_index];
 		matrix_part[marker_index][marker_index] = 0.02;
 	}		
+}
+
+function MarkerSorting(index)
+{
+	var sorting_array = [];
+	for(var i = 0; i < cluster_names.length; i++)
+		sorting_array.push(ranking_score_pair_marker[index][i][1]);
+
+	return sorting_array;
+}
+
+function ClusterSorting(index)
+{
+	var sorting_array = [];
+	for(var j = 0; j < marker_names.length; j++)
+		sorting_array.push(ranking_score_pair[index][j][1]);
+	return sorting_array;
 }
 
 //Heatmap
