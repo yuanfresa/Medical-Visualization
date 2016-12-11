@@ -1,191 +1,3 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<title> Heatmap </title>
-<html>
-  <head>
-    <style>
-      #heatmap svg *::selection {
-         background : transparent;
-      }
-     
-      #heatmap svg *::-moz-selection {
-         background:transparent;
-      } 
-     
-      #heatmap svg *::-webkit-selection {
-         background:transparent;
-      }
-
-      #heatmap rect.selection {
-        stroke          : #333;
-        stroke-dasharray: 4px;
-        stroke-opacity  : 0.5;
-        fill            : transparent;
-      }
-
-      #heatmap rect.cell-border {
-        stroke: #eee;
-        stroke-width:0.3px;   
-      }
-
-      #heatmap rect.cell-selected {
-        stroke: rgb(51,102,153);
-        stroke-width:0.8 px;
-        opacity: 1.0;   
-      }
-
-      #heatmap rect.cell-hover {
-        stroke: #F00;
-        stroke-width: 0.8 px;
-        opacity: 1.0;   
-      }
-
-      #heatmap text.mono {
-        font-size: 9pt;
-        font-family: Consolas, courier;
-        fill: #aaa;
-      }
-
-      #heatmap text.low {
-        font-size: 9pt;
-        font-family: Consolas, courier;
-        fill: #006837;
-      }
-
-      #heatmap text.high{
-        font-size: 9pt;
-        font-family: Consolas, courier;
-        fill: #a50026;
-      }
-
-      #heatmap #heatmap text.legend{
-        font-size: 9pt;
-        font-family: Consolas, courier;
-        fill: #a6d96a;
-      }
-
-
-      #heatmap text.text-selected {
-        fill: #000;
-      }
-
-      #heatmap text.text-highlight {
-        fill: #c00;
-      }
-      #heatmap text.text-hover {
-        fill: #00C;
-      }
-
-      #tooltip {
-        position: absolute;
-        width: 200px;
-        height: auto;
-        padding: 10px;
-        background-color: white;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        pointer-events: none;
-        opacity: 0.8
-      }
-
-      #tooltip.hidden {
-        display: none;
-      }
-
-      #tooltip p {
-        margin: 0;
-        font-family: sans-serif;
-        font-size: 12px;
-        line-height: 20px;
-      }
-    
-    </style>
-
-    <script src="http://code.jquery.com/jquery.js"></script>
-    <script src="http://d3js.org/d3.v3.js"></script>
-    <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
-    <script src="data.js"> 
-    </script>
-
-</head>
-
-<div id="tooltip" class="hidden">
-        <p><span id="value"></p>
-</div>
-
-<body>
-
-<script type="text/javascript">
-
-var points = _data.points;
-var marker_names = _data.names;
-var cluster_names = [];
-
-for (var i = 0; i < points.length; i++)
-{
-  if(!cluster_names.includes("cluster" + points[i].clusterID))
-    cluster_names.push("cluster" + points[i].clusterID); 
-}
-
-//data processing
-var show_marker_num = 2,
-  cluster_marker_matrix = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  cluster_marker_matrix[i] = [];
-  for (var j = 0; j < marker_names.length; j++)
-  {
-    cluster_marker_matrix[i][j] = [];
-  }
-}
-for (var i = 0; i < points.length; i++)
-{
-  for(var j = 0; j < points[i].expression.length; j++)
-  {
-    var cluster_index = cluster_names.indexOf("cluster" + points[i].clusterID); 
-    cluster_marker_matrix[cluster_index][j].push(points[i].expression[j]);
-  }
-}
-var variance_matrix = [],
-  mean_matrix = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  variance_matrix[i] = [];
-  mean_matrix[i] = [];
-
-  for (var j = 0; j < marker_names.length; j++)
-  {
-
-    variance_matrix[i][j] = [];
-    mean_matrix[i][j] = [];
-    variance_matrix[i][j].push(d3.deviation(cluster_marker_matrix[i][j]), j)
-    mean_matrix[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
-  }
-}
-
-// normalize the variance matrix
-var variance_max = d3.max(d3.max(variance_matrix))[0],
-    variance_min = d3.min(d3.min(variance_matrix))[0];
-
-var data = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  for (var j = 0; j < marker_names.length; j++)
-  {
-    data.push({
-      dim_col: (j + 1),
-      dim_row: (i + 1),
-      "mean": mean_matrix[i][j][0],
-      "variance" : variance_matrix[i][j][0],
-      "variance_nor" : (-variance_matrix[i][j][0] + variance_max)/(variance_max-variance_min)
-    });
-  }
-}
-
 var margin_h = { top: 100, right: 80, bottom: 50, left: 80 },
     row_num = cluster_names.length,
     col_num = marker_names.length,
@@ -210,14 +22,14 @@ var colorScale_h = d3.scale.quantile()    // is a function
     .range(colors_h);
     
 
-var svg = d3.select("body").append("svg")
-        .attr("width", width_h + margin_h.left + margin_h.right)
-        .attr("height", height_h + margin_h.top + margin_h.bottom)
+var svg = d3.selectAll("svg")
+        // .attr("width", width_h + margin_h.left + margin_h.right)
+        // .attr("height", height_h + margin_h.top + margin_h.bottom)
         .append("g")
         .attr("id","heatmap")
         .attr("transform", "translate(" + margin_h.left + "," + margin_h.top + ")");
 
-draw_heatmap(data);
+draw_heatmap(data_heatmap);
 
 function ShowChordCluster(index)
 {
@@ -352,9 +164,3 @@ function draw_heatmap(data)
           .attr("y", gridSize * (row_num + 3))     
           .text("High");
 };
-
-
-
-    </script>
-  </body>
-</html>
