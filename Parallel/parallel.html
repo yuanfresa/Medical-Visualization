@@ -6,42 +6,42 @@ svg {
   font: 10px sans-serif;
 }
 
-.background path {
+ #parallel .background path {
   fill: none;
   stroke: #ddd;
   shape-rendering: crispEdges;
-  opacity: 0.1;
+  opacity: 0.2;
 }
 
-.foreground path {
+#parallel .foreground path {
   fill: none;
   /*stroke: steelblue;*/
-  opacity: 0.1;
+  opacity: 0.2;
 }
 
-.brush .extent {
+#parallel .brush .extent {
   fill-opacity: .3;
   stroke: #fff;
   shape-rendering: crispEdges;
 }
 
-.axis line,
+#parallel .axis line,
 .axis path {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
 }
 
-.axis text {
+#parallel .axis text {
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
   cursor: move;
 }
 
-#legend {
+/*#legend {
   text-align: left;
   overflow-y: auto;
   border-left: 1px solid rgba(140,140,140,0.5);
-}
+}*/
 </style>
 <body>
 <script src="https://d3js.org/d3.v3.min.js"></script>
@@ -49,10 +49,10 @@ svg {
 <script>
 
 var margin = {top: 40, right: 20, bottom: 10, left: 10},
-    width = 1210 - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
+    p_width = 1210 - margin.left - margin.right,
+    p_height = 300 - margin.top - margin.bottom;
 
-var x = d3.scale.ordinal().rangePoints([0, width], 1),
+var x = d3.scale.ordinal().rangePoints([0, p_width], 1),
     y = {},
     dragging = {};
 
@@ -62,13 +62,14 @@ var line = d3.svg.line(),
     foreground;
 
 var color = d3.scale.ordinal()
-    .range(["#f4bfd9","#a15383","#a477ca","#4faa4a","#f7ef6a","#a6dfea","#d1784c","#e487cd","#a1e494","#0d64f3","#f7ad2c","#f7572c","#2cf7a8","#f92ced"]);
+    .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ff9896","#ffbb78","#9edae5","#dbdb8d"]);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", p_width + margin.left + margin.right)
+    .attr("height", p_height + margin.top + margin.bottom)
   .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("id","parallel");
 
 var points = _data.points;
 var marker_names = _data.names;
@@ -86,13 +87,50 @@ for (var i = 0; i < _data.points.length; i++){
   data.push(object);
 }
 
+var cluster_names = [];
+for (var i = 0; i < points.length; i++)
+{
+  if(!cluster_names.includes("cluster" + points[i].clusterID))
+    cluster_names.push("cluster" + points[i].clusterID);
+}
+
+var cluster_marker_matrix = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+  cluster_marker_matrix[i] = [];
+  for (var j = 0; j < marker_names.length; j++)
+  {
+    cluster_marker_matrix[i][j] = [];
+  }
+}
+
+for (var i = 0; i < points.length; i++)
+{
+  for(var j = 0; j < points[i].expression.length; j++)
+  {
+    var cluster_index = cluster_names.indexOf("cluster"+points[i].clusterID);
+    cluster_marker_matrix[cluster_index][j].push(points[i].expression[j]);
+  }
+}
+
+mean_matrix = [];
+for (var i = 0; i < cluster_names.length; i++)
+{
+  mean_matrix[i] = [];
+  for (var j = 0; j < marker_names.length; j++)
+  {
+    mean_matrix[i][j] = [];
+    mean_matrix[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
+  }
+}
+
 //d3.csv("cars.csv", function(error, cars) {
 
   // Extract the list of dimensions and create a scale for each.
   x.domain(dimensions = _data.names.filter(function(d) {
     return d != "name" && (y[d] = d3.scale.linear()
         .domain(d3.extent(data, function(p) { return +p[d]; }))
-        .range([height, 0]));
+        .range([p_height, 0]));
   }));
 
   // Add grey background lines for context.
@@ -125,7 +163,7 @@ for (var i = 0; i < _data.points.length; i++){
           background.attr("visibility", "hidden");
         })
         .on("drag", function(d) {
-          dragging[d] = Math.min(width, Math.max(0, d3.event.x));
+          dragging[d] = Math.min(p_width, Math.max(0, d3.event.x));
           foreground.attr("d", path);
           dimensions.sort(function(a, b) { return position(a) - position(b); });
           x.domain(dimensions);
@@ -161,14 +199,14 @@ for (var i = 0; i < _data.points.length; i++){
       //.style("font", "10px sans-serif");
 
       legend.append("text")
-      .attr("x", width - 16)
+      .attr("x", p_width - 16)
       .attr("y", 5)
       .attr("dy", ".35em")
       .attr("text-anchor", "end")
       .text(function(d,i) { return i; });
 
       legend.append("rect")
-      .attr("x", width - 10)
+      .attr("x", p_width - 10)
       .attr("width", 18)
       .attr("height", 10)
       .attr("fill", color);
