@@ -126,12 +126,14 @@ stroke-width: .25px;
   line-height: 20px;
 }
 #highlight {
-  position: absolute;
-  /*width: 200px;
-  height: auto;*/
-  padding: 10px;
-  opacity: 0.3
-}
+    position: absolute;
+    background-color: red;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    opacity: 0.5
+  }
 
 #highlight.hidden {
   display: none;
@@ -182,6 +184,9 @@ svg {
 
 <div id="tooltip" class="hidden">
         <p><span id="value"></p>
+</div>
+
+<div id="highlight" class="hidden">
 </div>
 	
 
