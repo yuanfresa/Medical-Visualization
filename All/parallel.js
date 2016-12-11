@@ -1,53 +1,3 @@
-﻿<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-svg {
-  font: 10px sans-serif;
-}
-
- #parallel .background path {
-  fill: none;
-  stroke: #ddd;
-  shape-rendering: crispEdges;
-  opacity: 0.2;
-}
-
-#parallel .foreground path {
-  fill: none;
-  /*stroke: steelblue;*/
-  opacity: 0.2;
-}
-
-#parallel .brush .extent {
-  fill-opacity: .3;
-  stroke: #fff;
-  shape-rendering: crispEdges;
-}
-
-#parallel .axis line,
-.axis path {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-#parallel .axis text {
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-  cursor: move;
-}
-
-/*#legend {
-  text-align: left;
-  overflow-y: auto;
-  border-left: 1px solid rgba(140,140,140,0.5);
-}*/
-</style>
-<body>
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<script src="data.js"></script>
-<script>
-
 var margin = {top: 40, right: 20, bottom: 10, left: 10},
     p_width = 1210 - margin.left - margin.right,
     p_height = 300 - margin.top - margin.bottom;
@@ -64,77 +14,21 @@ var line = d3.svg.line(),
 var color = d3.scale.ordinal()
     .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ff9896","#ffbb78","#9edae5","#dbdb8d"]);
 
-var svg = d3.select("body").append("svg")
-    .attr("width", p_width + margin.left + margin.right)
-    .attr("height", p_height + margin.top + margin.bottom)
+var parallel_group = d3.select("svg")
+    // .attr("width", p_width + margin.left + margin.right)
+    // .attr("height", p_height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     .attr("id","parallel");
 
-var points = _data.points;
-var marker_names = _data.names;
-
-var data=[];
-for (var i = 0; i < _data.points.length; i++){
-  var object = {};
-  object["clusterID"] = _data.points[i]["clusterID"];
-
-  for (var j = 0; j  <marker_names.length; j++) {
-
-     object[marker_names[j]] = _data.points[i]["expression"][j];
-  }
-
-  data.push(object);
-}
-
-var cluster_names = [];
-for (var i = 0; i < points.length; i++)
-{
-  if(!cluster_names.includes("cluster" + points[i].clusterID))
-    cluster_names.push("cluster" + points[i].clusterID);
-}
-
-var cluster_marker_matrix = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  cluster_marker_matrix[i] = [];
-  for (var j = 0; j < marker_names.length; j++)
-  {
-    cluster_marker_matrix[i][j] = [];
-  }
-}
-
-for (var i = 0; i < points.length; i++)
-{
-  for(var j = 0; j < points[i].expression.length; j++)
-  {
-    var cluster_index = cluster_names.indexOf("cluster"+points[i].clusterID);
-    cluster_marker_matrix[cluster_index][j].push(points[i].expression[j]);
-  }
-}
-
-mean_matrix = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  mean_matrix[i] = [];
-  for (var j = 0; j < marker_names.length; j++)
-  {
-    mean_matrix[i][j] = [];
-    mean_matrix[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
-  }
-}
-
-//d3.csv("cars.csv", function(error, cars) {
-
-  // Extract the list of dimensions and create a scale for each.
-  x.domain(dimensions = _data.names.filter(function(d) {
+x.domain(dimensions = _data.names.filter(function(d) {
     return d != "name" && (y[d] = d3.scale.linear()
         .domain(d3.extent(data, function(p) { return +p[d]; }))
         .range([p_height, 0]));
   }));
 
   // Add grey background lines for context.
-  background = svg.append("g")
+  background = parallel_group.append("g")
       .attr("class", "background")
     .selectAll("path")
       .data(data)
@@ -142,7 +36,7 @@ for (var i = 0; i < cluster_names.length; i++)
       .attr("d", path);
 
   // Add blue foreground lines for focus.
-  foreground = svg.append("g")
+  foreground = parallel_group.append("g")
       .attr("class", "foreground")
     .selectAll("path")
       .data(data)
@@ -151,7 +45,7 @@ for (var i = 0; i < cluster_names.length; i++)
       .style("stroke", function(d) { return color(d.clusterID); });
 
   // Add a group element for each dimension.
-  var g = svg.selectAll(".dimension")
+  var g = parallel_group.selectAll(".dimension")
       .data(dimensions)
     .enter().append("g")
       .attr("class", "dimension")
@@ -266,11 +160,3 @@ function showParallelCluster(index){
 function ClearParallel(){
 
 }
-
-</script>
-<!--   <div  class="third">
-      <h3>Cluster ID</h3>
-      <p id="legend">
-      </p>
-  </div> -->
-</body>
