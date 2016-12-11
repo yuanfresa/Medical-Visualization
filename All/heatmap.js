@@ -1,4 +1,4 @@
-var margin_h = { top: 50, right: 0, bottom: 30, left: 75 },
+var margin_h = { top: 80, right: 0, bottom: 30, left: 75 },
     row_num = cluster_names.length,
     col_num = marker_names.length,
     width_h = width_window*0.6 - margin_h.left - margin_h.right,  //
@@ -18,10 +18,10 @@ var colorScale_h = d3.scale.quantile()    // is a function
     
 
 var heatmap_group = d3.selectAll("svg")
+        .append("g")
         .attr("id","heatmap")
         .attr("width", width_h)
-        .attr("height", height_h)
-        .append("g")      
+        .attr("height", height_h)      
         .attr("transform", "translate(" + margin_h.left + "," + margin_h.top + ")");
 
 draw_heatmap(data_heatmap);
@@ -62,8 +62,8 @@ function draw_heatmap(data_heatmap)
       .data(marker_names)
       .enter().append("text")
       .text(function(d) { return d; })
-      .attr("x", function (d, i) { return i * gridSize; })
-      .attr("y", 0)
+      .attr("x", 0)
+      .attr("y", function (d, i) { return i * gridSize; })
       .style("text-anchor", "left")
       .attr("transform", "translate(" + gridSize / 2 + ", -6) rotate(-90)") 
       .attr("class", function (d,i) { return "marker_names mono r" + i;})
