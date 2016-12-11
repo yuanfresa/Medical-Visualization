@@ -15,8 +15,8 @@ var color = d3.scale.ordinal()
     .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ff9896","#ffbb78","#9edae5","#dbdb8d"]);
 
 var parallel_group = d3.select("svg")
-   .attr("width", p_width + margin.left + margin.right)
-   .attr("height", p_height + margin.top + margin.bottom)
+   // .attr("width", p_width + margin.left + margin.right)
+   // .attr("height", p_height + margin.top + margin.bottom)
    .append("g")
     .attr("transform", "translate(" + margin.left + "," + 0.4*height_window + ")")
     .attr("id","parallel");
@@ -85,11 +85,11 @@ x.domain(dimensions = _data.names.filter(function(d) {
       .attr("y", -9)
       .text(function(d) { return d; });
 
-    var legend = g.selectAll(".legend")
+    var legend = parallel_group.selectAll(".legend")
     .data(color.domain())
     .enter().append("g")
       .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," + i * 18 + ")"; })
+      .attr("transform", function(d, i) { return "translate(10," + i * 18 + ")"; })
       //.style("font", "10px sans-serif");
 
       legend.append("text")
