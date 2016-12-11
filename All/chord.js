@@ -8,8 +8,8 @@ function colores_google(n) {
 }
 
 //Draw SVG_chord
-var width_chord = 600,
-	height_chord = 600,
+var width_chord = width_window * 0.4,
+	height_chord = height_window * 0.4,
 	outerRadius = Math.min(width_chord, height_chord) / 2 - 10,
 	innerRadius = outerRadius - 24;
  
@@ -27,10 +27,10 @@ var layout = d3.layout.chord()
 var path = d3.svg.chord()
 				.radius(innerRadius);
  
-var svg = d3.select("body").append("svg")
-			.attr("transform", "translate(" + 100 + "," + 100 + ")")
-			.attr("width", width_chord)
-			.attr("height", height_chord);
+// var svg = d3.select("body").append("svg")
+			//.attr("transform", "translate(" + 100 + "," + 100 + ")")
+			//.attr("width", width_chord)
+			//.attr("height", height_chord);
 
 draw_chord();
 
@@ -122,7 +122,9 @@ function draw_chord()
 
 	var circle = svg.append("g")
 		.attr("id", "circle")
-		.attr("transform", "translate(" + width_chord / 2 + "," + height_chord / 2 + ")");
+		.attr("width", width_chord)
+        .attr("height", height_chord)
+		.attr("transform", "translate(" + (width_window * 0.6+ width_chord/2) + "," + height_chord/2 + ")");
 
 	circle.append("circle")
 		.attr("r", outerRadius);
