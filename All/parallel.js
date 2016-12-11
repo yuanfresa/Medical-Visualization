@@ -1,6 +1,6 @@
 var margin = {top: 40, right: 20, bottom: 10, left: 10},
-    p_width = 1210 - margin.left - margin.right,
-    p_height = 300 - margin.top - margin.bottom;
+    p_width = width_window - margin.left - margin.right,
+    p_height = height_window *0.6 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal().rangePoints([0, p_width], 1),
     y = {},
@@ -15,10 +15,10 @@ var color = d3.scale.ordinal()
     .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ff9896","#ffbb78","#9edae5","#dbdb8d"]);
 
 var parallel_group = d3.select("svg")
-    // .attr("width", p_width + margin.left + margin.right)
-    // .attr("height", p_height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+   .attr("width", p_width + margin.left + margin.right)
+   .attr("height", p_height + margin.top + margin.bottom)
+   .append("g")
+    .attr("transform", "translate(" + margin.left + "," + 0.4*height_window + ")")
     .attr("id","parallel");
 
 x.domain(dimensions = _data.names.filter(function(d) {
