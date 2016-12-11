@@ -26,24 +26,12 @@ var heatmap_group = d3.selectAll("svg")
 
 draw_heatmap(data_heatmap);
 
-// function ShowChordCluster(index)
-// {
-//   console.log("Chord of cluster : " + index);
-// }
-
-// function ShowChordMarker(index)
-// {
-//   console.log("Chord of marker : " + index);
-// }
-// function ShowParallelCluster(index)
-// {
-//   console.log("Parallel of cluster : " + index);
-// }
 
 function draw_heatmap(data_heatmap)
 {
   // cluster y axis->row labels
-  var rowLabels = heatmap_group.selectAll(".rowLabel")
+  var rowLabels = heatmap_group.append("g")
+      .selectAll(".rowLabel")
       .data(cluster_names)
       .enter().append("text")
         .text(function (d) { return d; })
@@ -54,29 +42,48 @@ function draw_heatmap(data_heatmap)
         .attr("class", function (d,i) { return "cluster_names mono r" + i;})
         .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
         .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
-        .on("click", function(d,i) {ShowChordCluster(i); ShowParallelCluster(i);})
-        
+        .on("click", function(d,i) {
+          ShowChordCluster(i); 
+          //ShowParallelCluster(i);
+          //update highlight position 
+          d3.select("#highlight")
+                 .style("height", (gridSize) + "px")
+                 .style("width", (gridSize * col_num ) + "px")
+                 .style("left", (margin_h.left ) + "px")
+                 .style("top", (margin_h.top + i*gridSize ) + "px");
+          
+               //Show the highlight
+          d3.select("#highlight").classed("hidden", false);  
+        })
+
   //marker x axis -> col labels    
-  var colLabels = heatmap_group.selectAll(".colLabel")
+  var colLabels = heatmap_group.append("g")
+      .selectAll(".colLabel")
       .data(marker_names)
       .enter().append("text")
-        .text(function(d) { return d; })
-        .attr("x", 0)
-        .attr("y", function (d, i) { return i * gridSize; })
-        .style("text-anchor", "left")
-        .attr("transform", "translate(" + gridSize / 2 + ", -6) rotate(-90)") 
-        .attr("class", function (d,i) { return "marker_names mono r" + i;})
-        .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
-        .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
-        .on("click", function(d,i) {
-               ShowChordMarker(i);
-          //highlight text
-               draw_highlight_row(i);
-
-        })
-  
+      .text(function(d) { return d; })
+      .attr("x", function (d, i) { return i * gridSize; })
+      .attr("y", 0)
+      .style("text-anchor", "left")
+      .attr("transform", "translate(" + gridSize / 2 + ", -6) rotate(-90)") 
+      .attr("class", function (d,i) { return "marker_names mono r" + i;})
+      .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
+      .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
+      .on("click", function(d,i) {
+        ShowChordMarker(i);
+        //update highlight position 
+        d3.select("#highlight")
+               .style("height", (gridSize * row_num ) + "px")
+               .style("width", (gridSize) + "px")
+               .style("left", (margin_h.left + i*gridSize) + "px")
+               .style("top", (margin_h.top) + "px");
+        
+             //Show the highlight
+        d3.select("#highlight").classed("hidden", false);       
+      })
   //heatmap
-  var heatMap = heatmap_group.selectAll(".heatMap")
+  var heatMap = heatmap_group.append("g")
+      .selectAll(".heatMap")
       .data(data_heatmap)
       .enter().append("rect")
       .attr("x", function(d) { return (d.dim_col - 1 + (1-Math.sqrt(d.variance_nor ))/2 ) * gridSize; })

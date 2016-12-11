@@ -8,7 +8,7 @@ var w = window,
 var svg = d3.select("body").append("svg")
         .attr("width", width_window)
         .attr("height", width_window)
-        .append("g");
+        //.append("g");
 
 function updateWindow(){
     width_window = w.innerWidth || e.clientWidth || g.clientWidth;
