@@ -127,12 +127,15 @@ stroke-width: .25px;
 }
  #highlight {
     position: absolute;
-    background-color: red;
+    /*background-color: white;
     -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
     -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
     pointer-events: all;
-    opacity: 0.6
+    opacity: 0.4s*/
+    border-radius: 1px;
+    border: 2px solid #F00;
+    padding: 0px; 
   }
 
  #highlight.hidden {
@@ -196,8 +199,8 @@ svg {
 <script type="text/javascript" src="svg.js" ></script>
 <script type="text/javascript" src="chord.js" ></script>
 <script type="text/javascript" src="heatmap.js" ></script>
-<script type="text/javascript" src="parallel.js" ></script>
-
+<!-- <script type="text/javascript" src="parallel.js" ></script>
+ -->
 
 <p>Please select the number of most important markers shown per cluster</p>
 <div id = "container" align="left" style = "left: 300px; position: relative;">
