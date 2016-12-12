@@ -2,18 +2,18 @@
  
 @import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b);
  
-html {
+/*html {
 min-width: 1040px;
-}
+}*/
  
-body {
+/*body {
 background: #fcfcfa;
 color: #333;
 font-family: "PT Serif", serif;
 margin: 1em auto 4em auto;
 position: relative;
 width: 960px;
-}
+}*/
  
 header,
 footer,
@@ -63,12 +63,12 @@ color: #636363;
 text-align: right;
 }
  
-aside {
+/*aside {
 font-size: small;
 right: 0;
 position: absolute;
 width: 180px;
-}
+}*/
  
 .attribution {
 font-size: small;
@@ -79,13 +79,13 @@ body > p, li > p {
 line-height: 1.5em;
 }
  
-body > p {
+/*body > p {
 width: 720px;
 }
  
 body > blockquote {
 width: 640px;
-}
+}*/
  
 blockquote q {
 display: block;
@@ -116,11 +116,11 @@ textarea {
 font-size: 100%;
 }
  
-body > pre {
+/*body > pre {
 border-left: solid 2px #ccc;
 padding-left: 18px;
 margin: 2em 0 2em -20px;
-}
+}*/
  
 .html .value,
 .javascript .string,
