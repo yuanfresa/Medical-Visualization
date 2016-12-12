@@ -1,68 +1,37 @@
-var margin_h = { top: 100, right: 80, bottom: 50, left: 80 },
+var margin_h = { top: 80, right: 0, bottom: 30, left: 75 },
     row_num = cluster_names.length,
     col_num = marker_names.length,
-    width_h = 960 - margin_h.left - margin_h.right,  //
-    height_h = 630 - margin_h.top - margin_h.bottom, //
-    gridSize = Math.floor(width_h / col_num),
-    legendWidth = gridSize * 1.5;
+    width_h = width_window*0.6 - margin_h.left - margin_h.right,  //
+    height_h = height_window*0.4 - margin_h.top - margin_h.bottom, //
+    gridSize = Math.min(width_h / col_num, height_h/row_num),
+    legendWidth = gridSize ;
 
  
  //color -> mean 
 
 var maxMean = d3.max(d3.max(mean_matrix))[0],
     maxMean = Math.floor(maxMean)+1,
-    buckets = 10,
-    colors1 = colorbrewer.RdYlGn[buckets],
-    colors_h = [];
-    for (var i = 0; i < colors1.length; i++) {
-      colors_h[i] = colors1[colors1.length-i-1];
-    }
+    colors_h = ["#006837","#1a9850","#66bd63","#a6d96a","#d9ef8b","#fee08b","#fdae61","#f46d43","#d73027","#a50026"];
 var colorScale_h = d3.scale.quantile()    // is a function
     .domain([0, maxMean])
     .range(colors_h);
     
 
-var svg = d3.selectAll("svg")
-        // .attr("width", width_h + margin_h.left + margin_h.right)
-        // .attr("height", height_h + margin_h.top + margin_h.bottom)
+var heatmap_group = d3.selectAll("svg")
         .append("g")
         .attr("id","heatmap")
+        .attr("width", width_h)
+        .attr("height", height_h)      
         .attr("transform", "translate(" + margin_h.left + "," + margin_h.top + ")");
 
 draw_heatmap(data_heatmap);
 
-function ShowChordCluster(index)
-{
-  console.log("Chord of cluster : " + index);
-}
 
-function ShowChordMarker(index)
-{
-  console.log("Chord of marker : " + index);
-}
-function ShowParallelCluster(index)
-{
-  console.log("Parallel of cluster : " + index);
-}
-
-function draw_highlight_row(row) 
-{
-  console.log("highlight of row" + row);
-  var highlight_row= svg.selectAll(".highlight_row")
-      .append('rect')
-      .attr("x", 0)
-      .attr("y", gridSize * row)
-      .attr("rx", 1)
-      .attr("ry", 1)
-      .attr("class", "cell-hover")
-      .attr("width", gridSize*col_num)  
-      .attr("height", gridSize) 
-}
-
-function draw_heatmap(data)
+function draw_heatmap(data_heatmap)
 {
   // cluster y axis->row labels
-  var rowLabels = svg.selectAll(".rowLabel")
+  var rowLabels = heatmap_group.append("g")
+      .selectAll(".rowLabel")
       .data(cluster_names)
       .enter().append("text")
         .text(function (d) { return d; })
@@ -73,29 +42,49 @@ function draw_heatmap(data)
         .attr("class", function (d,i) { return "cluster_names mono r" + i;})
         .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
         .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
-        .on("click", function(d,i) {ShowChordCluster(i); ShowParallelCluster(i);})
+        .on("click", function(d,i) {
+          ShowChordCluster(i); 
+          //ShowParallelCluster(i);
+          //update highlight position 
+          d3.select("#highlight")
+                 .style("height", (gridSize) + "px")
+                 .style("width", (gridSize * col_num ) + "px")
+                 .style("left", (margin_h.left ) + "px")
+                 .style("top", (margin_h.top + i*gridSize ) + "px");
+          
+               //Show the highlight
+          d3.select("#highlight").classed("hidden", false);  
+        })
+
   //marker x axis -> col labels    
-  var colLabels = svg.selectAll(".colLabel")
+  var colLabels = heatmap_group.append("g")
+      .selectAll(".colLabel")
       .data(marker_names)
       .enter().append("text")
-        .text(function(d) { return d; })
-        .attr("x", 0)
-        .attr("y", function (d, i) { return i * gridSize; })
-        .style("text-anchor", "left")
-        .attr("transform", "translate(" + gridSize / 2 + ", -6) rotate(-90)") 
-        .attr("class", function (d,i) { return "marker_names mono r" + i;})
-        .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
-        .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
-        .on("click", function(d,i) {
-               ShowChordMarker(i);
-          //highlight text
-               draw_highlight_row(i);
-
-        })
-  
+      .text(function(d) { return d; })
+      .attr("x", 0)
+      .attr("y", function (d, i) { return i * gridSize; })
+      .style("text-anchor", "left")
+      .attr("transform", "translate(" + gridSize / 2 + ", -6) rotate(-90)") 
+      .attr("class", function (d,i) { return "marker_names mono r" + i;})
+      .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
+      .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
+      .on("click", function(d,i) {
+        ShowChordMarker(i);
+        //update highlight position 
+        d3.select("#highlight")
+               .style("height", (gridSize * row_num ) + "px")
+               .style("width", (gridSize) + "px")
+               .style("left", (margin_h.left + i*gridSize) + "px")
+               .style("top", (margin_h.top) + "px");
+        
+             //Show the highlight
+        d3.select("#highlight").classed("hidden", false);       
+      })
   //heatmap
-  var heatMap = svg.selectAll(".heatMap")
-      .data(data)
+  var heatMap = heatmap_group.append("g")
+      .selectAll(".heatMap")
+      .data(data_heatmap)
       .enter().append("rect")
       .attr("x", function(d) { return (d.dim_col - 1 + (1-Math.sqrt(d.variance_nor ))/2 ) * gridSize; })
       .attr("y", function(d) { return (d.dim_row - 1 + (1-Math.sqrt(d.variance_nor))/2) * gridSize; })
@@ -133,34 +122,34 @@ function draw_heatmap(data)
 
 
 
-    var legend = svg.selectAll(".legend")
+    var legend = heatmap_group.selectAll(".legend")
               .data(colors_h)
               .enter().append("g")
               .attr("class", "legend");
 
     legend.append("rect")
-      .attr("x", function(d, i) { return gridSize * i ; })
-      .attr("y", gridSize * (row_num + 1))
+      .attr("x", gridSize * (col_num + 1))
+      .attr("y", function(d, i) { return gridSize * i ; })
       .attr("width", gridSize)
       .attr("height", gridSize)
       .style("fill", function(d) { return d; })
       .attr("class", "square");
 
 
-    var title = svg.append("text")
+    var title = heatmap_group.append("text")
           .attr("class", "legend")
-          .attr("x", -60 )
-          .attr("y", gridSize * (row_num + 2))      
-          .style("font-size", "14px")
+          .attr("x", gridSize * (col_num + 1))
+          .attr("y", -10)      
+          .style("font-size", "15px")
           .text("Legend");
-    var low = svg.append("text")
+    var low = heatmap_group.append("text")
           .attr("class", "low")
-          .attr("x", 0 )
-          .attr("y", gridSize * (row_num + 3))     
+          .attr("x", gridSize * (col_num + 2) )
+          .attr("y", gridSize/2)     
           .text("Low");
-    var high = svg.append("text")
+    var high = heatmap_group.append("text")
           .attr("class", "high")
-          .attr("x", gridSize * 9 )
-          .attr("y", gridSize * (row_num + 3))     
+          .attr("x", gridSize * (col_num + 2) )
+          .attr("y", gridSize * 10)     
           .text("High");
 };
