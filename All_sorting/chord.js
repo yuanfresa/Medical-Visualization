@@ -1,4 +1,3 @@
-
 //Color functions
 // var c20b = d3.scale.category20();
 
@@ -120,11 +119,14 @@ function draw_chord()
 		}		
 	}
 
+	var midpoint_x = width_window * 0.6+ width_chord/2,
+		midpoint_y = height_chord/2 + 10;
+
 	var circle = svg.append("g")
 		.attr("id", "circle")
 		.attr("width", width_chord)
         .attr("height", height_chord)
-		.attr("transform", "translate(" + (width_window * 0.6+ width_chord/2) + "," + height_chord/2 + ")");
+		.attr("transform", "translate(" + midpoint_x + "," + midpoint_y + ")");
 
 	circle.append("circle")
 		.attr("r", outerRadius);
@@ -160,11 +162,101 @@ function draw_chord()
 			.text(function(d, i) { return group_names[i]; });
 	 
 	// Remove the labels that don't fit. :(
-	// groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 +1.5 < this.getComputedTextLength(); })
-	// .remove();
+	groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 < this.getComputedTextLength() +25 || d3.max(matrix_part[i])==0})
+		.remove();
 
-	groupText.filter(function(d, i) { return d3.max(matrix_part[i])==0})
-	 		.remove();
+	var path_end_point = [];
+	var OuterLabel = group.append("path")
+						.attr("class", "pathOuterLine")
+						.attr("d", function(d, i){
+
+							if(d3.max(matrix_part[i])==0 || d3.select(this.parentNode).selectAll("text")[0].length==1)
+								return null;
+
+							var d3line2 = d3.svg.line()
+					                        .x(function(d){return d.x;})
+					                        .y(function(d){return d.y;})
+					                        .interpolate("linear");
+
+					        var pathInfo = []; 
+					        var linePoint = {};
+					        var lineLength = 15;
+
+							var angle = 0.5 * (d.startAngle + d.endAngle);
+							linePoint.x = outerRadius * Math.sin(angle);
+							linePoint.y = outerRadius * Math.cos(angle) * (-1);
+							pathInfo.push(linePoint);
+
+							linePoint = {};
+							if(angle <= Math.PI * 0.5)
+							{
+								linePoint.x = pathInfo[0].x + lineLength;
+								linePoint.y = pathInfo[0].y;
+								pathInfo.push(linePoint);
+
+								linePoint = {};
+								linePoint.x = pathInfo[1].x + lineLength * 0.5;
+								linePoint.y = pathInfo[1].y - lineLength * 0.5;
+								pathInfo.push(linePoint);
+
+								path_end_point[i] = pathInfo[pathInfo.length-1];
+							}
+							else if(angle <= Math.PI)
+							{
+								linePoint.x = pathInfo[0].x + lineLength;
+								linePoint.y = pathInfo[0].y;
+								pathInfo.push(linePoint);
+
+								linePoint = {};
+								linePoint.x = pathInfo[1].x + lineLength * 0.5;
+								linePoint.y = pathInfo[1].y + lineLength * 0.5;
+								pathInfo.push(linePoint);
+
+								path_end_point[i] = pathInfo[pathInfo.length-1];
+							}
+
+							else if(angle <= Math.PI * 1.5)
+							{
+								linePoint.x = pathInfo[0].x - lineLength;
+								linePoint.y = pathInfo[0].y;
+								pathInfo.push(linePoint);
+
+								linePoint = {};
+								linePoint.x = pathInfo[1].x - lineLength * 0.5;
+								linePoint.y = pathInfo[1].y + lineLength * 0.5;
+								pathInfo.push(linePoint);
+
+								path_end_point[i] = pathInfo[pathInfo.length-1];
+							}
+							else
+							{
+								linePoint.x = pathInfo[0].x - lineLength;
+								linePoint.y = pathInfo[0].y;
+								pathInfo.push(linePoint);
+
+								linePoint = {};
+								linePoint.x = pathInfo[1].x - lineLength * 0.5;
+								linePoint.y = pathInfo[1].y - lineLength * 0.5;
+								pathInfo.push(linePoint);
+
+								path_end_point[i] = pathInfo[pathInfo.length-1];
+							}
+
+
+							return d3line2(pathInfo);
+						})
+				        .style("stroke-width", 1)
+				        .style("stroke", "steelblue")
+				        .style("fill", "none");
+
+	group.append("text")
+		.text(function(d, i){ return path_end_point[i]==null? null:group_names[i];})
+		.attr("transform", function(d, i){
+			if(path_end_point[i]==null) return "translate(0,0)";
+
+			path_end_point[i].x -= path_end_point[i].x>0?0:25 / 4 * group_names[i].length;
+			return "translate(" + path_end_point[i].x+ ", " + path_end_point[i].y +")";
+		});
 	 
 	// Add the chords.
 	var chord = circle.selectAll(".chord")
