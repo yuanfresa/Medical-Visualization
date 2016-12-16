@@ -1,61 +1,6 @@
-﻿<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-svg {
-  font: 10px sans-serif;
-}
-
- #parallel .background path {
-  fill: none;
-  stroke: #ddd;
-  shape-rendering: crispEdges;
-  opacity: 0.1;
-}
-
-#parallel .foreground path {
-  fill: none;
-  /*stroke: steelblue;*/
-  opacity: 0.2;
-}
-
-#parallel .mean path {
-  fill: none;
-  opacity: 0.9;
-}
-
-#parallel .brush .extent {
-  fill-opacity: .3;
-  stroke: #fff;
-  shape-rendering: crispEdges;
-}
-
-#parallel .axis line,
-.axis path {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-#parallel .axis text {
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-  cursor: move;
-}
-
-/*#legend {
-  text-align: left;
-  overflow-y: auto;
-  border-left: 1px solid rgba(140,140,140,0.5);
-}*/
-</style>
-<body>
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<script src="data.js"></script>
-<script>
-
 var margin = {top: 40, right: 20, bottom: 10, left: 10},
-    p_width = 1210 - margin.left - margin.right,
-    p_height = 300 - margin.top - margin.bottom;
+    p_width = width_window - margin.left - margin.right,
+    p_height = height_window *0.6 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal().rangePoints([0, p_width], 1),
     y = {},
@@ -64,89 +9,19 @@ var x = d3.scale.ordinal().rangePoints([0, p_width], 1),
 var line = d3.svg.line(),
     axis = d3.svg.axis().orient("left"),
     background,
-    foreground,
-    p_mean;
+    foreground;
 
 var color = d3.scale.ordinal()
     .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ff9896","#ffbb78","#9edae5","#dbdb8d"]);
 
-   var svg = d3.select("body").append("svg")
-   var parallel_group = d3.select("svg")
-    .attr("width", p_width + margin.left + margin.right)
-    .attr("height", p_height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+var parallel_group = d3.select("svg")
+   // .attr("width", p_width + margin.left + margin.right)
+   // .attr("height", p_height + margin.top + margin.bottom)
+   .append("g")
+    .attr("transform", "translate(" + margin.left + "," + 0.4*height_window + ")")
     .attr("id","parallel");
 
-var points = _data.points;
-var marker_names = _data.names;
-
-var data=[];
-for (var i = 0; i < _data.points.length; i++){
-  var object = {};
-  object["clusterID"] = _data.points[i]["clusterID"];
-
-  for (var j = 0; j  <marker_names.length; j++) {
-
-     object[marker_names[j]] = _data.points[i]["expression"][j];
-  }
-
-  data.push(object);
-}
-
-var cluster_names = [];
-for (var i = 0; i < points.length; i++)
-{
-  if(!cluster_names.includes("cluster" + points[i].clusterID))
-    cluster_names.push("cluster" + points[i].clusterID);
-}
-
-var cluster_marker_matrix = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  cluster_marker_matrix[i] = [];
-  for (var j = 0; j < marker_names.length; j++)
-  {
-    cluster_marker_matrix[i][j] = [];
-  }
-}
-
-for (var i = 0; i < points.length; i++)
-{
-  for(var j = 0; j < points[i].expression.length; j++)
-  {
-    var cluster_index = cluster_names.indexOf("cluster"+points[i].clusterID);
-    cluster_marker_matrix[cluster_index][j].push(points[i].expression[j]);
-  }
-}
-
-// var mean = [];
-// for (var i = 0; i < cluster_names.length; i++)
-// {
-//   mean[i] = {};
-//   for (var j = 0; j < marker_names.length; j++)
-//   {
-    
-//     mean[i][marker_names[j]] = [];
-
-//     mean[i][j].push(d3.mean(cluster_marker_matrix[i][j]), j);
-//   }
-// }
-
-var mean = [];
-for (var i = 0; i < cluster_names.length; i++)
-{
-  mean[i] = [];
-  for (var j = 0; j < marker_names.length; j++)
-  {
-    mean[i][j]= d3.mean(cluster_marker_matrix[i][j]);
-  }
-}
-
-//d3.csv("cars.csv", function(error, cars) {
-
-  // Extract the list of dimensions and create a scale for each.
-  x.domain(dimensions = _data.names.filter(function(d) {
+x.domain(dimensions = _data.names.filter(function(d) {
     return d != "name" && (y[d] = d3.scale.linear()
         .domain(d3.extent(data, function(p) { return +p[d]; }))
         .range([p_height, 0]));
@@ -160,7 +35,7 @@ for (var i = 0; i < cluster_names.length; i++)
     .enter().append("path")
       .attr("d", path);
 
-  // Add color foreground lines for focus.
+  // Add blue foreground lines for focus.
   foreground = parallel_group.append("g")
       .attr("class", "foreground")
     .selectAll("path")
@@ -168,16 +43,6 @@ for (var i = 0; i < cluster_names.length; i++)
     .enter().append("path")
       .attr("d", path)
       .style("stroke", function(d) { return color(d.clusterID); });
-
-  //Add mean value lines
-  p_mean = parallel_group.append("g")
-      .attr("class", "mean")
-    .selectAll("path")
-      .data(mean)
-    .enter().append("path")
-      .attr("d", mean_path)
-      .style("stroke", function(d,i) { return color(i); })
-      .style("display","none");
 
   // Add a group element for each dimension.
   var g = parallel_group.selectAll(".dimension")
@@ -226,18 +91,17 @@ for (var i = 0; i < cluster_names.length; i++)
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(10," + i * 18 + ")"; })
       //.style("font", "10px sans-serif");
-  
 
       legend.append("text")
-      .attr("x", p_width - 6)
+      .attr("x", p_width - 16)
       .attr("y", 5)
       .attr("dy", ".35em")
       .attr("text-anchor", "end")
       .text(function(d,i) { return i; });
 
       legend.append("rect")
-      .attr("x", p_width )
-      .attr("width", 10)
+      .attr("x", p_width - 10)
+      .attr("width", 18)
       .attr("height", 10)
       .attr("fill", color);
       
@@ -263,12 +127,7 @@ function transition(g) {
 
 // Returns the path for a given data point.
 function path(d) {
-  return line(dimensions.map(function(p) { 
-    return [position(p), y[p](d[p])]; }));
-}
-
-function mean_path(d) {
-  return line(dimensions.map(function(p,i) { return [x(p), y[p](d[i])]; }));
+  return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
 }
 
 function brushstart() {
@@ -279,48 +138,25 @@ function brushstart() {
 function brush() {
   var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
       extents = actives.map(function(p) { return y[p].brush.extent(); });
-
   foreground.style("display", function(d) {
     return actives.every(function(p, i) {
       return extents[i][0] <= d[p] && d[p] <= extents[i][1];
     }) ? null : "none";
   });
-
 }
 
-var p_showMean=false;
-
-// ClearParallel();
-// showParallelMean();
-// ClearParallel();
-// showParallelCluster(9);
-
 function showParallelMean(){
-  p_showMean=true;
-  foreground.style("display","none");
-  p_mean.style("display",null);
+
 }
 
 function showParallelAll(){
-  p_showMean=false;
-  foreground.style("display",null);
-  p_mean.style("display","none");
+
 }
 
 function showParallelCluster(index){
-  if(p_showMean)
-    p_mean.filter(function(d,i) { return i== index })  
-            .style("display", null);
-  else
-  foreground.filter(function(d) { return d.clusterID== index })  
-            .style("display", null);
 
 }
 
 function ClearParallel(){
-  p_mean.style("display","none");
-  foreground.style("display","none");
-}
 
-</script>
-</body>
+}
