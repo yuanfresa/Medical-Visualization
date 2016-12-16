@@ -9,16 +9,15 @@ var x = d3.scale.ordinal().rangePoints([0, p_width], 1),
 var line = d3.svg.line(),
     axis = d3.svg.axis().orient("left"),
     background,
-    foreground;
+    foreground,
+    p_mean;
 
 var color = d3.scale.ordinal()
     .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#ff9896","#ffbb78","#9edae5","#dbdb8d"]);
 
 var parallel_group = d3.select("svg")
-   // .attr("width", p_width + margin.left + margin.right)
-   // .attr("height", p_height + margin.top + margin.bottom)
    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + 0.4*height_window + ")")
+    .attr("transform", "translate(" + margin.left + "," + 0.42*height_window + ")")
     .attr("id","parallel");
 
 x.domain(dimensions = _data.names.filter(function(d) {
@@ -43,6 +42,16 @@ x.domain(dimensions = _data.names.filter(function(d) {
     .enter().append("path")
       .attr("d", path)
       .style("stroke", function(d) { return color(d.clusterID); });
+
+  //Add mean value lines
+  p_mean = parallel_group.append("g")
+      .attr("class", "mean")
+    .selectAll("path")
+      .data(mean)
+    .enter().append("path")
+      .attr("d", mean_path)
+      .style("stroke", function(d,i) { return color(i); })
+      .style("display","none");
 
   // Add a group element for each dimension.
   var g = parallel_group.selectAll(".dimension")
@@ -130,6 +139,10 @@ function path(d) {
   return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
 }
 
+function mean_path(d) {
+  return line(dimensions.map(function(p,i) { return [x(p), y[p](d[i])]; }));
+}
+
 function brushstart() {
   d3.event.sourceEvent.stopPropagation();
 }
@@ -145,18 +158,35 @@ function brush() {
   });
 }
 
-function showParallelMean(){
+var p_showMean=false;
+// ClearParallel();
+// showParallelMean();
+// ClearParallel();
+// showParallelCluster(9);
+// showParallelCluster(7);
 
+function showParallelMean(){
+  p_showMean=true;
+  foreground.style("display","none");
+  p_mean.style("display",null);
 }
 
 function showParallelAll(){
-
+  p_showMean=false;
+  foreground.style("display",null);
+  p_mean.style("display","none");
 }
 
 function showParallelCluster(index){
-
+  if(p_showMean)
+      p_mean.filter(function(d,i) { return i== index })  
+              .style("display", null);
+    else
+    foreground.filter(function(d) { return d.clusterID== index })  
+              .style("display", null);
 }
 
 function ClearParallel(){
-
+  p_mean.style("display","none");
+  foreground.style("display","none");
 }
