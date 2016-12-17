@@ -28,7 +28,7 @@ var layout = d3.layout.chord()
 				// .sortSubgroups(d3.descending)
 				// .sortChords(d3.ascending);
  
-var path = d3.svg.chord()
+var path_chord = d3.svg.chord()
 				.radius(innerRadius);
 
 draw_chord();
@@ -79,13 +79,32 @@ function ShowChordMarker(index)
 	var chord = svg.selectAll("#circle").selectAll(".chord")
 	var i =  cluster_names.indexOf(marker_names[index]);
 	
-	i = index;
 	chord.classed("unshow", function(p) {
 		if(p.source.index == i || p.target.index == i)
 			return !this.classList.contains("unshow");
 		else
 			return this.classList.contains("unshow");
 	});
+}
+
+function ClickLegendChord(index, string)
+{
+	var chord = svg.selectAll("#circle").selectAll(".chord")
+	i = index;
+
+	chord.classed("unshow", function(p) {
+	if(p.source.index == i || p.target.index == i)
+	{
+		return !this.classList.contains("unshow");
+	}
+	else
+		return this.classList.contains("unshow");
+	});
+}
+
+function EmptyChord()
+{
+	var chord = svg.selectAll("#circle").selectAll(".chord").classed("unshow", true);
 }
 
 //Draw chord
@@ -248,7 +267,7 @@ function draw_chord()
 		.enter().append("path")
 		.attr("class", "chord")
 		.style("fill", function(d) { return colores_google(d.target.index); })
-		.attr("d", path);
+		.attr("d", path_chord);
 
 	chord.filter(function(d, i) {
 			return d.source.index == d.target.index;

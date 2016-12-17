@@ -84,7 +84,11 @@ var legend = parallel_group.selectAll(".legend")
   .data(color.domain())
   .enter().append("g")
     .attr("class", "legend")
-    .attr("transform", function(d, i) { return "translate(10," + i * 18 + ")"; });
+    .attr("transform", function(d, i) { return "translate(10," + i * 18 + ")"; })
+    .style("opacity", 1)
+    .on("click", function(d, i){
+          ClickLegendParallel(i);
+      });
 
     legend.append("text")
     .attr("x", p_width - 6)
@@ -155,27 +159,92 @@ showParallelAll();
 // ClearParallel();
 
 function showParallelMean(){
+  parallel_cleared = true;
   p_showMean=true;
   foreground.style("display","none");
   p_mean.style("display",null);
+
+  for(var i = 0; i < legend[0].length; i++)
+    legend[0][i].style.opacity = 1;
 }
 
 function showParallelAll(){
+  parallel_cleared = true;
   p_showMean=false;
   foreground.style("display",null);
   p_mean.style("display","none");
+
+  for(var i = 0; i < legend[0].length; i++)
+    legend[0][i].style.opacity = 1;
 }
 
 function showParallelCluster(index){
+
+  if(parallel_cleared)
+  {
+    parallel_cleared=false;
+    p_mean.style("display","none");
+    foreground.style("display","none");
+
+    for(var i = 0; i < legend[0].length; i++)
+      legend[0][i].style.opacity = 0.2;
+  }
+
   if(p_showMean)
     p_mean.filter(function(d,i) { return i== index })  
             .style("display", null);
   else
     foreground.filter(function(d) { return d.clusterID== index })  
               .style("display", null);
+
+  legend[0][index].style.opacity = 1;
 }
 
+var parallel_cleared = true;
+
 function ClearParallel(){
+  
+  parallel_cleared = true;
   p_mean.style("display","none");
   foreground.style("display","none");
+
+  p_showMean?showParallelMean():showParallelAll();
+}
+
+function ClickLegendParallel(index)
+{
+  if(legend[0][index].style.opacity == 1)
+  {
+    legend[0][index].style.opacity = 0.2;
+    if(p_showMean)
+      p_mean.filter(function(d,i) { return i== index;})  
+            .style("display", "none");
+    else
+      foreground.filter(function(d) { return d.clusterID== index; })  
+              .style("display", "none");
+
+    ClickLegendChord(index, "none");
+  }
+  else
+  {
+    legend[0][index].style.opacity = 1;
+    if(p_showMean)
+      p_mean.filter(function(d,i) { return i== index;})  
+            .style("display", null);
+    else
+      foreground.filter(function(d) { return d.clusterID== index; })  
+              .style("display", null);
+
+    ClickLegendChord(index, null);
+  }
+}
+
+function EmptyParallel()
+{
+  parallel_cleared = false;
+  p_mean.style("display","none");
+  foreground.style("display","none");
+
+  for(var i = 0; i < legend[0].length; i++)
+    legend[0][i].style.opacity = 0.2;
 }

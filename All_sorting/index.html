@@ -185,23 +185,21 @@ svg {
 <body>
 
 <div id="tooltip" class="hidden">
-        <p><span id="value"></p>
+    <p><span id="value"></p>
 </div>
 
-<div id="highlight" class="hidden">
-</div>
-	
+<div id="highlight" class="hidden"></div>
 
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
-<script type="text/javascript" src="data.js" ></script>
+<script type="text/javascript" src="data_small.js" ></script>
 <script type="text/javascript" src="data_processing.js" ></script>
 <script type="text/javascript" src="svg.js" ></script>
 <script type="text/javascript" src="chord.js" ></script>
 <script type="text/javascript" src="heatmap.js" ></script>
 <script type="text/javascript" src="parallel.js" ></script>
+<script type="text/javascript" src="functions.js" ></script>
 
-<!-- <p>Please select the number of most important markers shown per cluster</p> -->
 <div id = "container" align="left" style = "left: 300px; position: relative;">
 <div id = "selectionUI">
   <select id="show_num" onchange="ClearChord()">
@@ -214,10 +212,13 @@ svg {
   					.attr("value", i+1)
 					.text(i + 1);
   		}
-  		document.getElementById("show_num").value = show_marker_num;
-  						
+  		document.getElementById("show_num").value = show_marker_num;		
   	</script>
   </select>
+  <Button onclick="ClearGraph()">Clear Graph</Button>
+  <Button onclick="EmptyGraph()">Empty Graph</Button>
+  <Button onclick="showParallelMean()">Show Mean</Button>
+  <Button onclick="showParallelAll()">Show All</Button>
 </div>
 </div>
 </body>
