@@ -2,9 +2,11 @@ var margin_h = { top: 80, right: 0, bottom: 30, left: 75 },
     row_num = cluster_names.length,
     col_num = marker_names.length,
     width_h = width_window*0.6 - margin_h.left - margin_h.right,  //
-    height_h = height_window*0.4 - margin_h.top - margin_h.bottom, //
+    height_h = height_window*0.45 - margin_h.top - margin_h.bottom, //
     gridSize = Math.min(width_h / col_num, height_h/row_num),
     legendWidth = gridSize ;
+
+    margin_h.top = Math.max(margin_h.top, (height_h + margin_h.top + margin_h.bottom)/2 - cluster_names.length * gridSize/2);
 
  
  //color -> mean 
@@ -150,9 +152,11 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
       .enter().append("g")
       .attr("class", "legend");
 
+  var margin_h_legend = margin_h.top - (height_h + margin_h.top + margin_h.bottom)/2 + colors_h.length/2 * legendWidth;
+
   legend.append("rect")
         .attr("x", gridSize * (col_num + 1))
-        .attr("y", function(d, i) { return gridSize * i ; })
+        .attr("y", function(d, i) { return gridSize * i - margin_h_legend ; })
         .attr("width", gridSize)
         .attr("height", gridSize)
         .style("fill", function(d) { return d; })
@@ -162,12 +166,12 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
   var low = heatmap_group.append("text")
         .attr("class", "low")
         .attr("x", gridSize * (col_num + 2) )
-        .attr("y", gridSize/2)     
+        .attr("y", gridSize/2 - margin_h_legend)     
         .text("Low");
   var high = heatmap_group.append("text")
         .attr("class", "high")
         .attr("x", gridSize * (col_num + 2) )
-        .attr("y", gridSize * 10)     
+        .attr("y", gridSize * 10 - margin_h_legend)     
         .text("High");
 
 }
