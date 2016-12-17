@@ -147,13 +147,6 @@ svg {
   font: 10px sans-serif;
 }
 
-#parallel .background path {
-  fill: none;
-  stroke: #ddd;
-  shape-rendering: crispEdges;
-  opacity: 0.1;
-}
-
 #parallel .foreground path {
   fill: none;
   /*stroke: steelblue;*/
@@ -162,6 +155,7 @@ svg {
 
 #parallel .mean path {
   fill: none;
+  stroke-width: 2px;
   opacity: 0.9;
  }
 
@@ -207,12 +201,10 @@ svg {
 <script type="text/javascript" src="heatmap.js" ></script>
 <script type="text/javascript" src="parallel.js" ></script>
 
-
-<p>Please select the number of most important markers shown per cluster</p>
+<!-- <p>Please select the number of most important markers shown per cluster</p> -->
 <div id = "container" align="left" style = "left: 300px; position: relative;">
 <div id = "selectionUI">
   <select id="show_num" onchange="ClearChord()">
-
   	<script>
   		var show_num = d3.select("#show_num");
 
