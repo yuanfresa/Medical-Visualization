@@ -102,15 +102,15 @@ x.domain(dimensions = _data.names.filter(function(d) {
       //.style("font", "10px sans-serif");
 
       legend.append("text")
-      .attr("x", p_width - 16)
+      .attr("x", p_width - 6)
       .attr("y", 5)
       .attr("dy", ".35em")
       .attr("text-anchor", "end")
       .text(function(d,i) { return i; });
 
       legend.append("rect")
-      .attr("x", p_width - 10)
-      .attr("width", 18)
+      .attr("x", p_width)
+      .attr("width", 10)
       .attr("height", 10)
       .attr("fill", color);
       
@@ -136,7 +136,8 @@ function transition(g) {
 
 // Returns the path for a given data point.
 function path(d) {
-  return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+  return line(dimensions.map(function(p) { 
+    return [position(p), y[p](d[p])]; }));
 }
 
 function mean_path(d) {
@@ -151,6 +152,7 @@ function brushstart() {
 function brush() {
   var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
       extents = actives.map(function(p) { return y[p].brush.extent(); });
+
   foreground.style("display", function(d) {
     return actives.every(function(p, i) {
       return extents[i][0] <= d[p] && d[p] <= extents[i][1];
@@ -159,11 +161,13 @@ function brush() {
 }
 
 var p_showMean=false;
-// ClearParallel();
 // showParallelMean();
 // ClearParallel();
-// showParallelCluster(9);
+// // showParallelMean();
+// // ClearParallel();
+// showParallelCluster(2);
 // showParallelCluster(7);
+// ClearParallel();
 
 function showParallelMean(){
   p_showMean=true;
@@ -179,9 +183,9 @@ function showParallelAll(){
 
 function showParallelCluster(index){
   if(p_showMean)
-      p_mean.filter(function(d,i) { return i== index })  
-              .style("display", null);
-    else
+    p_mean.filter(function(d,i) { return i== index })  
+            .style("display", null);
+  else
     foreground.filter(function(d) { return d.clusterID== index })  
               .style("display", null);
 }
