@@ -32,8 +32,17 @@ data_rowlabel = DataForRowLabel(hcrow);
 data_collabel = DataForColLabel(hccol);
 draw_heatmap(data_heatmap, data_rowlabel, data_collabel);
 
+function clearHeatmap() {
+
+        d3.selectAll(".marker_names").remove();
+        d3.selectAll(".cluster_names").remove();
+        d3.selectAll(".square").remove();
+  
+}
+
 function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
 {
+  clearHeatmap();
   var rowLabels = heatmap_group.append("g")
       .selectAll(".rowLabel")
       .data(y_rowlabel)
@@ -56,11 +65,7 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
         newhccol = ClusterSorting(d.index);
         data_newcollabel = DataForColLabel(newhccol);
         data_clustersorting = DataForHeatmap(hcrow, newhccol); 
-        
-  // refresh
-        d3.selectAll(".marker_names").remove();
-        d3.selectAll(".cluster_names").remove();
-        //d3.selectAll("#heatmap").remove();
+ 
         draw_heatmap(data_clustersorting, data_rowlabel, data_newcollabel);
           //update highlight position
         d3.select("#highlight")
@@ -93,9 +98,6 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
         //data_rowlabel
         data_newrowlabel = DataForRowLabel(newhcrow);
         data_markersorting = DataForHeatmap(newhcrow, hccol);
-
-        d3.selectAll(".cluster_names").remove();
-        d3.selectAll(".marker_names").remove();
 
         draw_heatmap(data_markersorting, data_newrowlabel, data_collabel);
         //update highlight position 
@@ -156,11 +158,11 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
 
   legend.append("rect")
         .attr("x", gridSize * (col_num + 1))
-        .attr("y", function(d, i) { return gridSize * i - margin_h_legend ; })
-        .attr("width", gridSize)
-        .attr("height", gridSize)
+        .attr("y", function(d, i) { return gridSize * i/1.5 - margin_h_legend ; })
+        .attr("width", gridSize/1.5)
+        .attr("height", gridSize/1.5)
         .style("fill", function(d) { return d; })
-        .attr("class", "square");
+        //.attr("class", "square");
 
 
   var low = heatmap_group.append("text")
@@ -171,7 +173,7 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
   var high = heatmap_group.append("text")
         .attr("class", "high")
         .attr("x", gridSize * (col_num + 2) )
-        .attr("y", gridSize * 10 - margin_h_legend)     
+        .attr("y", gridSize * 10/1.5 - margin_h_legend)     
         .text("High");
 
 }
