@@ -1,10 +1,14 @@
-
 //Color functions
 // var c20b = d3.scale.category20();
 
+
+var colors_chord = colorbrewer.Spectral[11];
+var colorScale_chord = d3.scale.quantile()    // is a function
+    .domain([0, group_names.length])
+    .range(colors_chord);
+
 function colores_google(n) {
-  var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
-  return colores_g[n % colores_g.length];
+  return colorScale_chord(n);
 }
 
 //Draw SVG_chord
@@ -24,13 +28,8 @@ var layout = d3.layout.chord()
 				// .sortSubgroups(d3.descending)
 				// .sortChords(d3.ascending);
  
-var path = d3.svg.chord()
+var path_chord = d3.svg.chord()
 				.radius(innerRadius);
- 
-// var svg = d3.select("body").append("svg")
-			//.attr("transform", "translate(" + 100 + "," + 100 + ")")
-			//.attr("width", width_chord)
-			//.attr("height", height_chord);
 
 draw_chord();
 
@@ -58,17 +57,6 @@ function ShowChordCluster(index)
 {
 
 	var chord = svg.selectAll("#circle").selectAll(".chord")
-
-	// if(show_all_cluster)
-	// {
-	// 	show_all_cluster = false;
-	// 	chord.classed("unshow", true);
-	// }
-
-	// chord.classed("unshow", function(p) {
-	// 	return (p.source.index != index
-	// 	&& p.target.index != index) && this.classList.contains("unshow");
-	// });
 	
 	i = index;
 
@@ -91,13 +79,32 @@ function ShowChordMarker(index)
 	var chord = svg.selectAll("#circle").selectAll(".chord")
 	var i =  cluster_names.indexOf(marker_names[index]);
 	
-	i = index;
 	chord.classed("unshow", function(p) {
 		if(p.source.index == i || p.target.index == i)
 			return !this.classList.contains("unshow");
 		else
 			return this.classList.contains("unshow");
 	});
+}
+
+function ClickLegendChord(index, string)
+{
+	var chord = svg.selectAll("#circle").selectAll(".chord")
+	i = index;
+
+	chord.classed("unshow", function(p) {
+	if(p.source.index == i || p.target.index == i)
+	{
+		return !this.classList.contains("unshow");
+	}
+	else
+		return this.classList.contains("unshow");
+	});
+}
+
+function EmptyChord()
+{
+	var chord = svg.selectAll("#circle").selectAll(".chord").classed("unshow", true);
 }
 
 //Draw chord
@@ -141,11 +148,6 @@ function draw_chord()
 			.attr("class", "group")
 			.on("mouseover", mouseover)
 			.on("mousedown", mousedown);
-	 
-	// Add a mouseover title.
-	// group.append("title").text(function(d, i) {
-	// return cities[i].name + ": " + formatPercent(d.value) + " of origins";
-	// });
 	 
 	// Add the group arc.
 	var groupPath = group.append("path")
@@ -265,7 +267,7 @@ function draw_chord()
 		.enter().append("path")
 		.attr("class", "chord")
 		.style("fill", function(d) { return colores_google(d.target.index); })
-		.attr("d", path);
+		.attr("d", path_chord);
 
 	chord.filter(function(d, i) {
 			return d.source.index == d.target.index;

@@ -7,13 +7,13 @@ var w = window,
 
 var svg = d3.select("body").append("svg")
         .attr("width", width_window)
-        .attr("height", height_window);
+        .attr("height", height_window - 40);
         //.append("g");
 
 function updateWindow(){
     width_window = w.innerWidth || e.clientWidth || g.clientWidth;
     height_window = w.innerHeight|| e.clientHeight|| g.clientHeight;
     
-    svg.attr("width", width_window).attr("height", height_window);
+    svg.attr("width", width_window).attr("height", height_window - 40);
 }
 window.onresize = updateWindow;

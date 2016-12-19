@@ -99,7 +99,7 @@ stroke-width: .25px;
   fill: #00C;
 }
 
-#tooltip {
+ #tooltip {
   position: absolute;
   width: 200px;
   height: auto;
@@ -115,27 +115,30 @@ stroke-width: .25px;
   opacity: 0.8
 }
 
-#tooltip.hidden {
+ #tooltip.hidden {
   display: none;
 }
 
-#tooltip p {
+ #tooltip p {
   margin: 0;
   font-family: sans-serif;
   font-size: 12px;
   line-height: 20px;
 }
-#highlight {
+ #highlight {
     position: absolute;
-    background-color: red;
+    /*background-color: white;
     -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
     -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    pointer-events: none;
-    opacity: 0.5
+    pointer-events: all;
+    opacity: 0.4s*/
+    border-radius: 1px;
+    border: 2px solid #F00;
+    padding: 0px; 
   }
 
-#highlight.hidden {
+ #highlight.hidden {
   display: none;
 }
 
@@ -144,18 +147,17 @@ svg {
   font: 10px sans-serif;
 }
 
-#parallel .background path {
-  fill: none;
-  stroke: #ddd;
-  shape-rendering: crispEdges;
-  opacity: 0.2;
-}
-
 #parallel .foreground path {
   fill: none;
   /*stroke: steelblue;*/
   opacity: 0.2;
 }
+
+#parallel .mean path {
+  fill: none;
+  stroke-width: 2px;
+  opacity: 0.9;
+ }
 
 #parallel .brush .extent {
   fill-opacity: .3;
@@ -183,27 +185,24 @@ svg {
 <body>
 
 <div id="tooltip" class="hidden">
-        <p><span id="value"></p>
+    <p><span id="value"></p>
 </div>
 
-<div id="highlight" class="hidden">
-</div>
-	
+<div id="highlight" class="hidden"></div>
 
 <script src="https://d3js.org/d3.v3.min.js"></script>
-<script type="text/javascript" src="data.js" ></script>
+<script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+<script type="text/javascript" src="data_small.js" ></script>
 <script type="text/javascript" src="data_processing.js" ></script>
 <script type="text/javascript" src="svg.js" ></script>
 <script type="text/javascript" src="chord.js" ></script>
 <script type="text/javascript" src="heatmap.js" ></script>
 <script type="text/javascript" src="parallel.js" ></script>
+<script type="text/javascript" src="functions.js" ></script>
 
-
-<p>Please select the number of most important markers shown per cluster</p>
 <div id = "container" align="left" style = "left: 300px; position: relative;">
 <div id = "selectionUI">
   <select id="show_num" onchange="ClearChord()">
-
   	<script>
   		var show_num = d3.select("#show_num");
 
@@ -213,10 +212,13 @@ svg {
   					.attr("value", i+1)
 					.text(i + 1);
   		}
-  		document.getElementById("show_num").value = show_marker_num;
-  						
+  		document.getElementById("show_num").value = show_marker_num;		
   	</script>
   </select>
+  <Button onclick="ClearGraph()">Clear Graph</Button>
+  <Button onclick="EmptyGraph()">Empty Graph</Button>
+  <Button onclick="ShowMean()">Show Mean</Button>
+  <Button onclick="ShowAll()">Show All</Button>
 </div>
 </div>
 </body>
