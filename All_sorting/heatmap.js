@@ -39,6 +39,10 @@ function clearHeatmap() {
         d3.selectAll(".square").remove();
   
 }
+function RefreshHeatmap() {
+  draw_heatmap(data_heatmap, data_rowlabel, data_collabel);
+  d3.select("#highlight").classed("hidden", true); 
+}
 
 function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
 {
@@ -59,7 +63,8 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
         // i = d.sort
         //console.log(d.index);
         ShowChordCluster(d.index);
-        //ShowParallelCluster(i);
+        showParallelCluster(d.index);
+        //ClickLegendParallel(d.index);
 
         //ClusterSorting
         newhccol = ClusterSorting(d.index);
@@ -148,6 +153,7 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
 
     heatMap.transition()
         .style("fill", function(d) { return colorScale_h(d.mean); });
+  }
 
   var legend = heatmap_group.selectAll(".legend")
       .data(colors_h)
@@ -176,4 +182,3 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
         .attr("y", gridSize * 10/1.5 - margin_h_legend)     
         .text("High");
 
-}

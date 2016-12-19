@@ -2,6 +2,7 @@ function ClearGraph()
 {
 	ClearParallel();
 	ClearChord();
+	RefreshHeatmap();
 }
 
 function ShowMean()
@@ -20,4 +21,5 @@ function EmptyGraph()
 {
 	EmptyParallel();
 	EmptyChord();
+	RefreshHeatmap();
 }
