@@ -162,7 +162,7 @@ function draw_heatmap(x_heatmap, y_rowlabel, z_collabel)
         .attr("width", gridSize/1.5)
         .attr("height", gridSize/1.5)
         .style("fill", function(d) { return d; })
-        .attr("class", "square");
+        //.attr("class", "square");
 
 
   var low = heatmap_group.append("text")
