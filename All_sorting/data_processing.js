@@ -277,6 +277,7 @@ for (var i = 0; i < _data.points.length; i++){
 //     mean[i][j]= d3.mean(cluster_marker_matrix[i][j]);
 //   }
 // }
+
 var mean = [];
 for (var i = 0; i < cluster_names.length; i++)
 {
