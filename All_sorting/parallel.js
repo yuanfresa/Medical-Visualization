@@ -45,6 +45,7 @@ p_mean = parallel_group.append("g")
     .style("stroke", function(d,i) { return color(i); })
     .style("display","none");
 
+
 // Add a group element for each dimension.
 var g = parallel_group.selectAll(".dimension")
     .data(dimensions)
@@ -58,16 +59,21 @@ var g = parallel_group.selectAll(".dimension")
       })
       .on("drag", function(d) {
         dragging[d] = Math.min(p_width, Math.max(0, d3.event.x));
-        foreground.attr("d", path);
+        foreground.attr("d", path); 
+        p_mean.attr("d", mean_path); 
         dimensions.sort(function(a, b) { return position(a) - position(b); });
-        x.domain(dimensions);
+        // for (var k = 0; k < cluster_names.length; k++)
+        //   mean[k].sort(function(a, b) { return position(a) - position(b); });
+        // p_mean.data(mean);
+        x.domain(dimensions); 
         g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
       })
-      .on("dragend", function(d) {
+      .on("dragend", function(d) { 
         delete dragging[d];
-        transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
-        transition(foreground).attr("d", path)
-        .duration(500);
+
+        transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")"); 
+        transition(foreground).attr("d", path).duration(500); 
+        transition(p_mean).attr("d", mean_path).duration(500);
       }));
 
 // Add an axis and title.
@@ -129,7 +135,8 @@ function path(d) {
 }
 
 function mean_path(d) {
-  return line(dimensions.map(function(p,i) { return [x(p), y[p](d[i])]; }));
+  // return line(dimensions.map(function(p,i) { return [position(p), y[p](d[i])]; }));
+  return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
 }
 
 function brushstart() {
