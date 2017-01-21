@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<!-- <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css"> -->
 <title>Medical Visualization</title>
 <style>
 
@@ -176,10 +177,65 @@ svg {
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
   cursor: move;
 }
+
+footer {
+    font-family: sans-serif;
+    background: #EEEEFF;
+    margin-top: 10px;
+    text-align: center;
+}
+footer label{
+    cursor: pointer;
+}
+
+footer p {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
  
 </style>
  
 <header>
+<!-- <h1>Visualization of Clusters of High Dimensional Single Cell Data</h1> -->
 </header>
 
 <body>
@@ -222,4 +278,68 @@ svg {
   <Button onclick="ShowAll()">Show All</Button>
 </div>
 </div>
+
+<footer display="block">
+<!-- <nav>
+  <a href="/html/">HTML</a> |
+  <a href="/css/">CSS</a> |
+  <a href="/js/">JavaScript</a> |
+  <a href="/jquery/">jQuery</a>
+</nav> -->
+
+<!-- Trigger/Open The Modal -->
+<label id="myBtn">About</label> 
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close" >&times;</span>
+    <h1>Visualization of Clusters of <br>High Dimensional Single Cell Data</h1>
+
+    <p align="justify">Mass cytometry is a popular way nowadays used for determination of the properties of cells. 
+    These data from mass cytometry contain immune system signatures made up of high dimensional vectors which create 
+    a huge barrier for visualization. In this project, we propose a set of linked graphs with proper interactions 
+    that provide better insights about the data while preserving details.</p>
+    <p align="left">
+    <a href="https://drive.google.com/file/d/0BzOSOwPGU6MXVzRsTDJmNnVldTA/view?usp=sharing">
+    More information
+    </a>
+    </p>
+    <p align="left">  Posted by: 
+     <a href="mailto:R.Sun@student.tudelft.nl">Ruoqing Sun</a> ,&nbsp
+     <a href="mailto:Y.Zhou-11@student.tudelft.nl">Yuan Zhou</a> ,&nbsp
+     <a href="mailto:Y.Zeng-3@student.tudelft.nl">Yun Zeng</a>.</p>
+  </div>
+
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
 </body>
